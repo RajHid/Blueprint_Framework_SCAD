@@ -65,7 +65,10 @@ if (DesignStatus=="sizing"){
 // ===============================================================================
 // =----- Module to help coloring different modules to make it easier 
 // ===============================================================================
-//Main_Assembly(12,76,true);
+// Main_Assembly(12,76,true);
+// LOW_RESOLUTION: low reaulution value to speed up preview
+// HIGH_RESOLUTION: high resolution value for rendering the .stl
+// CUT_MODULES_RENDERED: decides if the cuttingmodules get renderred to see them. use cuttingmodules twice one time within the final part to cut and one time to just schow it.
 module Main_Assembly(LOW_RESOLUTION=12,HIGH_RESOLUTION=36,CUT_MODULES_RENDERED){
 $fn = $preview ? LOW_RESOLUTION : HIGH_RESOLUTION ; // Facets in preview (F5) set to 12, in Reder (F6) is set to 72
     see_me_in_colourful(){
