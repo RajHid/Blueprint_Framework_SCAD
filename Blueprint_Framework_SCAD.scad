@@ -4,9 +4,6 @@
 // = Used Libraries =
 // ==================================
 
-// Änderung
-// Eine Zweite Änderung
-
 // ==================================
 // = Variables =
 // ==================================
@@ -48,6 +45,10 @@ FN_ExtraFine=144;
 // = Tuning Variables =
 // ==================================
 // Variables for finetuning (The Slegehammer if something has to be made fit)
+
+// ==================================
+// = Customizer Section =
+// ==================================
 if (DesignStatus=="printing"){
     Main_Assembly(36,76,"false");
 }
@@ -62,13 +63,13 @@ if(DesignStatus=="fitting"){
 if (DesignStatus=="sizing"){
     Main_Assembly(16,36,"true");
 }
-// ===============================================================================
-// =----- Module to help coloring different modules to make it easier 
-// ===============================================================================
-// Main_Assembly(12,76,true);
+// ==================================
+// = MAINASSEMBLY =
+// ==================================
 // LOW_RESOLUTION: low reaulution value to speed up preview
 // HIGH_RESOLUTION: high resolution value for rendering the .stl
 // CUT_MODULES_RENDERED: decides if the cuttingmodules get renderred to see them. use cuttingmodules twice one time within the final part to cut and one time to just schow it.
+// Main_Assembly(12,76,true);
 module Main_Assembly(LOW_RESOLUTION=12,HIGH_RESOLUTION=36,CUT_MODULES_RENDERED){
 $fn = $preview ? LOW_RESOLUTION : HIGH_RESOLUTION ; // Facets in preview (F5) set to 12, in Reder (F6) is set to 72
     see_me_in_colourful(){
@@ -108,6 +109,9 @@ $fn = $preview ? LOW_RESOLUTION : HIGH_RESOLUTION ; // Facets in preview (F5) se
         }
     }
 }
+// ===============================================================================
+// = Module to help coloring different modules to make it easier 
+// ===============================================================================
 module see_me_in_colourful(){ // iterates the given modules and colors them automaticly by setting values using trigonometric funktions
     translate([0,0,0]){
         for(i=[0:1:$children-1]){
@@ -144,33 +148,16 @@ module see_me_in_colourful(){ // iterates the given modules and colors them auto
         }
     }
 }
+// ===============================================================================
+// =--------------------------------- Enviroment Modules ------------------------=
+// ===============================================================================
+// Modules that resembles the Enviroment aka the helmet where to atach a camera mount
 
-Projection_Cutter(5){
-//see_me_half();
-}
+// ===============================================================================
+// =--------------------------------- Modules -----------------------------------=
+// ===============================================================================
+//TEST_OBJECT();
 
-//// == Cutes a slice of the Objekts
-Intersection_Test_Cut("xy",1.5,16){
- //Intersection_Test_Cut( "xy",           // "Plaine xy yz xz", 
-                       // 1,              // Slicethickness , 
-                        //5,              // Distance from coordinate origin in plaine )
-   // OBJECTMODULESHERE 
-   //Frame_Base();
-}
-
-// ==================================
-// = Modus =
-// ==================================
-
- 
-// ==================================
-// = Stage =
-// ==================================
-// Final module for Produktion
-
-module Assembly(){
-
-}
 module TEST_OBJECT(){
     difference(){
         TEST_CUTCUBE(TestSlab_X,TestSlab_Y,TestSlab_Z);
@@ -178,17 +165,6 @@ module TEST_OBJECT(){
     }
     TEST_SPHERE();
 }
-
-// ===============================================================================
-// =--------------------------------- Enviroment Modules ------------------------=
-// ===============================================================================
-// Modules that resembles the Enviroment aka the helmet where to atach a camera mount
-
-
-// ===============================================================================
-// =--------------------------------- Modules -----------------------------------=
-// ===============================================================================
-//TEST_OBJECT();
 
 module TEST_CUTCUBE(X=30,Y=60,Z=15){
     cube([X,Y,Z]);
@@ -207,57 +183,6 @@ module TEST_CUTCYLINDER(H=TestCylinder_H,D1=TestCylinder_D1,D2=TestCylinder_D2){
 // ===============================================================================
 // ---------------------------------- Cutting Modules ----------------------------
 // ===============================================================================
-// === Half Cutter
-
-//HEX_Mesh_Pattern(){ Mesh(2.5,2.5);}
-module HEX_Mesh_Pattern(X=10,Y=30,DELTA=5,GRPL_X=45,GRPL_Y=115){
-Count_X=X;
-Count_Y=Y;
-
-//DELTA=1;
-
-X_STEPP=5.5+DELTA;
-Y_STEPP=7.5+DELTA;
-
-k=DELTA; //Distance between Hexshapes may be HEX_D/4 is good
-HEX_D=(GrindingPlate_X-((Count_X-1)*k/2))/(Count_X-1);
-
-SCALE_Y=GrindingPlate_Y/((HEX_D/2+k/4)*sqrt(3)*(Count_Y-1));
-echo("HEX_D*Count_Y",HEX_D*(Count_Y));
-echo("GrindingPlate_Y",GrindingPlate_Y);
-echo("SCALE_Y",SCALE_Y);
-
-//square([15,(HEX_D/2+k/4)*sqrt(3)*(Count_Y-1)]); // Helper Foo
-    
-// +++++++++++++++++++++++++++++++++++++++++
-    scale([1,SCALE_Y,1]){
-        union(){
-            for(j=[0:1:Count_Y-1]){
-                for(i=[0:1:Count_X-1-j%2]){
-                    translate([i*(HEX_D+k/2),0,0]){
-                        translate([(HEX_D/2+k/4)*(j%2),
-                                    j*((HEX_D/2+k/4)*sqrt(3)),
-                                    0]                          ){
-                        //translate([0,j*Y_STEPP,0]){
-                        rotate([0,0,60]){
-                            circle(d=HEX_D,$fn=6);
-                        }
-                            //children();
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-//Mesh(5,2);
-module Mesh(SHAPEDIMENSION_X=2.5,RADIUS=0.0){
-minkowski(){
-    circle(SHAPEDIMENSION_X-RADIUS,$fn=6);
-    //circle(r=RADIUS,$fn=64);
-    }
-    //circle(SHAPEDIMENSION_X,$fn=6); // Size Testing
-}
 //Screwcutter(100,10,100,4,1,5);
 module Screwcutter( SCREW_HEAD_h=200,
                     SCREW_HEAD_d=40,
@@ -395,6 +320,58 @@ module 2D_Rounded_Square_Base_Shape(DIMENSION_X=10,DIMENSION_Y=20,RADIUS=2,CENTE
         }
     }
 }
+//HEX_Mesh_Pattern(){ Mesh(2.5,2.5);}
+module HEX_Mesh_Pattern(X=10,Y=30,DELTA=5,GRPL_X=45,GRPL_Y=115){
+Count_X=X;
+Count_Y=Y;
+DIMENSION_X=35;
+DIMENSION_Y=67;
+
+
+//DELTA=1;
+
+X_STEPP=5.5+DELTA;
+Y_STEPP=7.5+DELTA;
+
+k=DELTA; //Distance between Hexshapes may be HEX_D/4 is good
+HEX_D=(DIMENSION_X-((Count_X-1)*k/2))/(Count_X-1);
+
+SCALE_Y=DIMENSION_Y/((HEX_D/2+k/4)*sqrt(3)*(Count_Y-1));
+echo("HEX_D*Count_Y",HEX_D*(Count_Y));
+echo("GrindingPlate_Y",DIMENSION_Y);
+echo("SCALE_Y",SCALE_Y);
+
+//square([15,(HEX_D/2+k/4)*sqrt(3)*(Count_Y-1)]); // Helper Foo
+    
+// +++++++++++++++++++++++++++++++++++++++++
+    scale([1,SCALE_Y,1]){
+        union(){
+            for(j=[0:1:Count_Y-1]){
+                for(i=[0:1:Count_X-1-j%2]){
+                    translate([i*(HEX_D+k/2),0,0]){
+                        translate([(HEX_D/2+k/4)*(j%2),
+                                    j*((HEX_D/2+k/4)*sqrt(3)),
+                                    0]                          ){
+                        //translate([0,j*Y_STEPP,0]){
+                        rotate([0,0,60]){
+                            //Mesh(0.5){square([HEX_D,HEX_D*1.2],center=true);}
+                            circle(d=HEX_D,$fn=6);
+                        }
+                            //children();
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+//Mesh(4){square([7,10],center=true);}
+module Mesh(RADIUS=0.0){
+minkowski(){
+    children();
+    circle(r=RADIUS,$fn=144);
+    }
+}
 // ===============================================================================
 // =--------------------------------- Symetrie Helper ---------------------------=
 // ===============================================================================
@@ -439,18 +416,15 @@ module MirrorMirrorOnTheWall(Offset_X,Offset_Y){
 // =--------------------------------- Textembossing -----------------------------=
 // ===============================================================================
 
-
 // ===============================================================================
 // =--------------------------------- Smoothing ---------------------------------=
 // ===============================================================================
-
 2D_Smooth_r=1;
 // Radius of a outer Tip Rounding 
 2D_Fillet_r=1;
 // Radius of a inner corner Ronding
 2D_Chamfer_DELTA_INN=1;
 2D_Chamfer_DELTA_OUT=2;
-
 // a straigt line on edges and corners
 2D_Chamfer_BOOLEAN=false;    
 module Smooth(r=3){
