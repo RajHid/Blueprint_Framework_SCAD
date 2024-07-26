@@ -8,14 +8,17 @@
 // = Variables =
 // ==================================
 
+/* [Tab Name_1] */
 // sizing printing or print a small part to test the object.
 DesignStatus="sizing"; // ["sizing","fitting","printing"]
 // Variables seen by customizer
+
 
 TestSlab_X=50;
 TestSlab_Y=100;
 TestSlab_Z=30;
 
+/* [Tab Name_2] */
 TestCylinder_H=35;
 TestCylinder_D1=25;
 TestCylinder_D2=45;
@@ -183,6 +186,21 @@ module TEST_CUTCYLINDER(H=TestCylinder_H,D1=TestCylinder_D1,D2=TestCylinder_D2){
 // ===============================================================================
 // ---------------------------------- Cutting Modules ----------------------------
 // ===============================================================================
+//Press_Fit_Cut(33,14,17,0.8);
+module Press_Fit_Cut(Angle=22,Thickness=11,Length=22,Width=0.2){
+    rotate([0,0,Angle]){
+        translate([0,0,Thickness/2]){
+            cylinder(h=Thickness,d=Width,center=true,$fn=12);
+        }
+        translate([0,-Width/2,0]){
+            cube([Length,Width,Thickness]);
+        }
+        translate([Length,0,Thickness/2]){
+            cylinder(h=Thickness,d=Width,center=true,$fn=12);
+        }
+    }
+}
+
 //Screwcutter(100,10,100,4,1,5);
 module Screwcutter( SCREW_HEAD_h=200,
                     SCREW_HEAD_d=40,
