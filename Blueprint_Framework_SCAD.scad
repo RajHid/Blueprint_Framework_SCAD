@@ -13,17 +13,13 @@
 DesignStatus="sizing"; // ["sizing","fitting","printing"]
 // Variables seen by customizer
 
-
-TestSlab_X=50;
-TestSlab_Y=100;
-TestSlab_Z=30;
-
-/* [Tab Name_2] */
-TestCylinder_H=35;
-TestCylinder_D1=25;
-TestCylinder_D2=45;
-
-TestSphere_D=42;
+Depth_x=80;
+Length_y=161;
+Height_z=35;
+Wallthickness=5;
+Radius=2;
+DELTA_X=3;
+DELTA_Y=0;
 
 module __Customizer_Limit__ () {}  // before these, the variables are usable in the cutomizer
 shown_by_customizer = false;
@@ -78,10 +74,10 @@ $fn = $preview ? LOW_RESOLUTION : HIGH_RESOLUTION ; // Facets in preview (F5) se
     see_me_in_colourful(){
         translate([0,0,0]){
             difference(){
-                TEST_OBJECT();
+                
                 translate([25,40,15]){                    
                     scale([0.4,0.4,0.4]){        
-                        TEST_CUTCUBE();
+                        
             }
         }
     }
@@ -91,7 +87,6 @@ $fn = $preview ? LOW_RESOLUTION : HIGH_RESOLUTION ; // Facets in preview (F5) se
         }        
         translate([0,0,0]){
             difference(){
-                TEST_SPHERE();
                 
             }
         }
@@ -99,7 +94,7 @@ $fn = $preview ? LOW_RESOLUTION : HIGH_RESOLUTION ; // Facets in preview (F5) se
         }
         translate([0,0,0]){
             if(CUT_MODULES_RENDERED=="true"){
-                TEST_CUTCYLINDER();
+                
             }
             else{
                 echo("CUT_MODULES_RENDERED= ",CUT_MODULES_RENDERED);
@@ -159,33 +154,101 @@ module see_me_in_colourful(){ // iterates the given modules and colors them auto
 // ===============================================================================
 // =--------------------------------- Modules -----------------------------------=
 // ===============================================================================
+Frame();
+module Frame(){
+    translate([0,0,0]){
+        difference(){            
+            translate([0,Wallthickness/2+Length_y,0]){
+                rotate([90,0,0]){
+                    translate([0,0,0]){
+                        Frame_BaseBlock(Length_y);
+                    }
+                }
+            }
+            translate([0,0,0]){
+                rotate([0,0,0]){
+                    Frame_BlockCUT();
+                }
+            }
+            #Hex_Mesch_Cutter();
+            translate([0,Length_y/12,Height_z-2*Wallthickness]){
+                rotate([0,-90,0]){
+                    translate([0,0,-Wallthickness+Wallthickness/4]){
+                        #Screwcutter(100,10,100,4,1,5);
+                    }
+                }
+            }
+            translate([0,Length_y-Length_y/12-Wallthickness,Height_z-2*Wallthickness]){
+                rotate([0,-90,0]){
+                    translate([0,0,-Wallthickness+Wallthickness/4]){
+                        #Screwcutter(100,10,100,4,1,5);
+                    }
+                }
+            }
+            translate([0,(Length_y/2)-Wallthickness/2,Height_z-2*Wallthickness]){
+                rotate([0,-90,0]){
+                    translate([0,0,-Wallthickness+Wallthickness/4]){
+                        #Screwcutter(100,10,100,4,1,5);
+                    }
+                }
+            }
+        }
+    }
+}
 //TEST_OBJECT();
 
-module TEST_OBJECT(){
-    difference(){
-        TEST_CUTCUBE(TestSlab_X,TestSlab_Y,TestSlab_Z);
-        TEST_CUTCYLINDER();
-    }
-    TEST_SPHERE();
-}
-
-module TEST_CUTCUBE(X=30,Y=60,Z=15){
-    cube([X,Y,Z]);
-}
-module TEST_SPHERE(D=TestSphere_D){
-//$fn = $preview ? 12 : 72; // Facets in preview (F5) set to 12, in Reder (F6) is set to 72
-    difference(){
-        sphere(d=D);
-        TEST_CUTCYLINDER();
-    }
-}
-module TEST_CUTCYLINDER(H=TestCylinder_H,D1=TestCylinder_D1,D2=TestCylinder_D2){
-    cylinder(h=H,d1=D1,d2=D2,$fn=24);
-}
+//module TEST_OBJECT(){
+//    difference(){
+//        TEST_CUTCUBE(TestSlab_X,TestSlab_Y,TestSlab_Z);
+//        TEST_CUTCYLINDER();
+//    }
+//    TEST_SPHERE();
+//}
+//
+//module TEST_CUTCUBE(X=30,Y=60,Z=15){
+//    cube([X,Y,Z]);
+//}
+//module TEST_SPHERE(D=TestSphere_D){
+////$fn = $preview ? 12 : 72; // Facets in preview (F5) set to 12, in Reder (F6) is set to 72
+//    difference(){
+//        sphere(d=D);
+//        TEST_CUTCYLINDER();
+//    }
+//}
+//module TEST_CUTCYLINDER(H=TestCylinder_H,D1=TestCylinder_D1,D2=TestCylinder_D2){
+//    cylinder(h=H,d1=D1,d2=D2,$fn=24);
+//}
 
 // ===============================================================================
 // ---------------------------------- Cutting Modules ----------------------------
 // ===============================================================================
+//Hex_Mesch_Cutter();
+module Hex_Mesch_Cutter(){
+    linear_extrude(Wallthickness*2){
+        intersection(){
+            Projection_Cutter(-Wallthickness-Radius){
+                #Frame_BlockCUT();
+            }
+            translate([DELTA_X,DELTA_Y,0]){
+                HEX_Mesh_Pattern();
+            }
+        }
+    }
+}
+
+//Frame_BlockCUT();
+module Frame_BlockCUT(){
+    translate([Wallthickness,-Wallthickness/2+Length_y,Wallthickness]){
+        rotate([90,0,0]){
+            minkowski(){
+                translate([Radius,Radius,Radius]){
+                    Frame_BaseBlock(Length_y-2*Radius-2*Wallthickness);
+                }
+                sphere(r=Radius,$fn=74);
+            }
+        }
+    }
+}
 //Press_Fit_Cut(33,14,17,0.8);
 module Press_Fit_Cut(Angle=22,Thickness=11,Length=22,Width=0.2){
     rotate([0,0,Angle]){
@@ -200,14 +263,13 @@ module Press_Fit_Cut(Angle=22,Thickness=11,Length=22,Width=0.2){
         }
     }
 }
-
-//Screwcutter(100,10,100,4,1,5);
+//Screwcutter(100,9,100,3.2,1.5,4.5);
 module Screwcutter( SCREW_HEAD_h=200,
                     SCREW_HEAD_d=40,
                     SCREW_BOLT_h=200,
-                    SCREW_BOLT_d=3,
+                    SCREW_BOLT_d=3.5,
                     SCREW_CAMPFER_h,
-                    SCREW_CAMPFER_d=SCREW_BOLT_d    ){
+                    SCREW_CAMPFER_d=3.5    ){
     translate([0,0,-SCREW_HEAD_h]){
         cylinder(h=SCREW_HEAD_h,d=SCREW_HEAD_d,$fn=32);
     }
@@ -226,7 +288,7 @@ module Bolt(BOLTLENGTH,BOLTDIAMETER,HEADDIAMETER,HEADHEIGHT){
         cylinder(h=HEADHEIGHT,d=HEADDIAMETER,center=true,$fn=6);
     }
 }
-//Projection_Cutter(3){sphere(10);};
+//Projection_Cutter(-Wallthickness){Frame();};
 module Projection_Cutter(Offset_z){    
     projection(cut = true){
         translate([0,0,Offset_z]){
@@ -271,6 +333,13 @@ module Intersection_Test_Cut(PLAIN,THICKNESS,OFFSET){
 // ---------------------------------- Linear Extrude Modules ---------------------
 // ===============================================================================
 
+
+//Frame_BaseBlock(Length_y=150);
+module Frame_BaseBlock(Length_y=100){
+    linear_extrude(Length_y+2*Wallthickness){
+        Frame_BaseShape(Depth_x=85,Height_z=35);
+    }
+}
 //Ring_Shaper(3,15,1.5);
 module Ring_Shaper(HEIGHT,OUTER,WALLTHICKNESS){
     linear_extrude(HEIGHT){
@@ -312,6 +381,11 @@ module DONUT(DIAMETER,DIAMETER_RING,SCAL_X,SCAL_Y){
 // =--------------------------------- 2D-Shapes ---------------------------------=
 // ===============================================================================
 
+
+//Frame_BaseShape(Depth_x=85,Height_z=35);
+module Frame_BaseShape(Depth_x=50,Height_z=20){
+    polygon(points=[[0.0,0.0],[0.0,Height_z],[Depth_x,Wallthickness],[Depth_x,0]]);
+}
 //2D_Ring_Shape(20,1);
 module 2D_Ring_Shape(OUTER_D,WALLTHICKNESS){
     difference(){
@@ -339,12 +413,11 @@ module 2D_Rounded_Square_Base_Shape(DIMENSION_X=10,DIMENSION_Y=20,RADIUS=2,CENTE
     }
 }
 //HEX_Mesh_Pattern(){ Mesh(2.5,2.5);}
-module HEX_Mesh_Pattern(X=10,Y=30,DELTA=5,GRPL_X=45,GRPL_Y=115){
+module HEX_Mesh_Pattern(X=7,Y=13,DELTA=6,GRPL_X=45,GRPL_Y=115){
 Count_X=X;
 Count_Y=Y;
-DIMENSION_X=35;
-DIMENSION_Y=67;
-
+DIMENSION_X=90;
+DIMENSION_Y=150;
 
 //DELTA=1;
 
@@ -358,11 +431,11 @@ SCALE_Y=DIMENSION_Y/((HEX_D/2+k/4)*sqrt(3)*(Count_Y-1));
 echo("HEX_D*Count_Y",HEX_D*(Count_Y));
 echo("GrindingPlate_Y",DIMENSION_Y);
 echo("SCALE_Y",SCALE_Y);
-
+echo("HEX_D",HEX_D);
 //square([15,(HEX_D/2+k/4)*sqrt(3)*(Count_Y-1)]); // Helper Foo
     
 // +++++++++++++++++++++++++++++++++++++++++
-    scale([1,SCALE_Y,1]){
+    scale([1,1,1]){
         union(){
             for(j=[0:1:Count_Y-1]){
                 for(i=[0:1:Count_X-1-j%2]){
@@ -371,7 +444,7 @@ echo("SCALE_Y",SCALE_Y);
                                     j*((HEX_D/2+k/4)*sqrt(3)),
                                     0]                          ){
                         //translate([0,j*Y_STEPP,0]){
-                        rotate([0,0,60]){
+                        rotate([0,0,30]){
                             //Mesh(0.5){square([HEX_D,HEX_D*1.2],center=true);}
                             circle(d=HEX_D,$fn=6);
                         }
